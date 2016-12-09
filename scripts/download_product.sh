@@ -2,6 +2,14 @@
 
 PIVNET_TOKEN="ay_DsUq1Hcyx9cSxxTKJ"
 
+WORK_DIR="$PWD/tmp/"
+
+function create_work_dir {
+  if [[ ! -d $WORK_DIR ]]; then
+    mkdir -p $WORK_DIR
+  fi
+}
+
 function login {
   pivnet-cli login --api-token=$PIVNET_TOKEN
 }

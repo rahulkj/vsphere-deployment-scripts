@@ -2,6 +2,8 @@
 
 . download_product.sh
 
+create_work_dir
+
 login
 get_slug_name elastic-runtime
 get_releases_json
