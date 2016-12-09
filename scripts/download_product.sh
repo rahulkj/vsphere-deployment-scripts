@@ -50,7 +50,6 @@ function download_stemcell {
   SC_RESPONSE=`pivnet-cli product-files -p $SC_SLUG_NAME -r $SC_VERSION --format=json`
 
   SC_PRODUCT_ID=`echo $SC_RESPONSE | jq '.[] | select(.name | contains("vSphere"))' | jq '.id' | tr -d '"'`
-  SC_FILE_VERSION=`echo $SC_RESPONSE | jq '.product_files[] | select(.name | contains("vSphere"))' | jq '.file_version' | tr -d '"'`
 
   pivnet-cli download-product-files -p $SC_SLUG_NAME -r $SC_VERSION -i $SC_PRODUCT_ID -d $WORK_DIR/
 }
