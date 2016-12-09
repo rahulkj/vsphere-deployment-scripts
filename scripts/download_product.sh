@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PIVNET_TOKEN="ay_DsUq1Hcyx9cSxxTKJ"
+. environment.sh
 
 WORK_DIR="$PWD/tmp"
 
