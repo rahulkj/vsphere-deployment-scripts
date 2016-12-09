@@ -1,8 +1,8 @@
 #!/bin/bash
 
-PIVNET_TOKEN="ay_DsUq1Hcyx9cSxxTKJ"
+PIVNET_TOKEN="yFQR2zYsJDbSLUy2Umxn"
 
-WORK_DIR="$PWD/tmp/"
+WORK_DIR="$PWD/tmp"
 
 function create_work_dir {
   if [[ ! -d $WORK_DIR ]]; then
@@ -20,12 +20,12 @@ function get_slug_name() {
 }
 
 function get_releases_json() {
-	pivnet-cli releases -p $SLUG_NAME --format=json | jq 'sort_by(.id)' > $COMPONENT-releases.json
+	COMPONENT_RELEASES=`pivnet-cli releases -p $SLUG_NAME --format=json | jq 'sort_by(.id)'`
 }
 
 function get_product_and_version_details() {
-	LENGTH=`cat $COMPONENT-releases.json | jq 'sort_by(.id) | length'`
-	PRODUCT_VERSION=`cat $COMPONENT-releases.json | jq .[$LENGTH-1].version`
+	LENGTH=`echo $COMPONENT_RELEASES | jq 'sort_by(.id) | length'`
+	PRODUCT_VERSION=`echo $COMPONENT_RELEASES | jq .[$LENGTH-1].version`
 }
 
 function accept_eula() {
@@ -33,15 +33,17 @@ function accept_eula() {
 }
 
 function download_product {
-  pivnet-cli download-product-files -p $SLUG_NAME -r $PRODUCT_VERSION -i $PRODUCT_ID -d .
+  pivnet-cli download-product-files -p $SLUG_NAME -r $PRODUCT_VERSION -i $PRODUCT_ID -d $WORK_DIR/
 }
 
 function find_stemcell_dependency() {
-	pivnet-cli release-dependencies -p $SLUG_NAME -r $PRODUCT_VERSION --format=json | jq '.[] | select(.release.product.name | contains("Stemcells"))' > stemcell-details.json
   SC_SLUG_NAME=stemcells
-  SC_VERSION=`cat stemcell-details.json | jq '.release.version' | tr -d '"'`
-  pivnet-cli releases -p $SC_SLUG_NAME --format=json | jq 'sort_by(.id)' > stemcell-releases.json
-  SC_PRODUCT_ID=`cat stemcell-releases.json | jq '.[] | select(.version=="'$SC_VERSION'")' | jq '.id'`
+
+	SC_DETAILS=`pivnet-cli release-dependencies -p $SLUG_NAME -r $PRODUCT_VERSION --format=json | jq '.[] | select(.release.product.name | contains("Stemcells"))'`
+
+  SC_VERSION=`echo $SC_DETAILS | jq '.release.version' | tr -d '"'`
+  STEMCELL_RELEASES=`pivnet-cli releases -p $SC_SLUG_NAME --format=json | jq 'sort_by(.id)'`
+  SC_PRODUCT_ID=`echo $STEMCELL_RELEASES | jq '.[] | select(.version=="'$SC_VERSION'")' | jq '.id'`
 }
 
 function download_stemcell {
@@ -50,5 +52,5 @@ function download_stemcell {
   SC_PRODUCT_ID=`echo $SC_RESPONSE | jq '.[] | select(.name | contains("vSphere"))' | jq '.id' | tr -d '"'`
   SC_FILE_VERSION=`echo $SC_RESPONSE | jq '.product_files[] | select(.name | contains("vSphere"))' | jq '.file_version' | tr -d '"'`
 
-  pivnet-cli download-product-files -p $SC_SLUG_NAME -r $SC_VERSION -i $SC_PRODUCT_ID -d .
+  pivnet-cli download-product-files -p $SC_SLUG_NAME -r $SC_VERSION -i $SC_PRODUCT_ID -d $WORK_DIR/
 }
