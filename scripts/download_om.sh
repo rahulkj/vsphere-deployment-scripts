@@ -8,9 +8,9 @@ login
 get_slug_name ops-manager
 get_releases_json
 get_product_and_version_details
-accept_eula
+accept_eula $SLUG_NAME $PRODUCT_VERSION
 
 RESPONSE=`pivnet-cli product-files -p $SLUG_NAME -r $PRODUCT_VERSION --format=json`
 PRODUCT_ID=`echo $RESPONSE | jq '.[] | select(.name | contains("vSphere"))' | jq '.id' | tr -d '"'`
 
-download_product
+download_product $SLUG_NAME $PRODUCT_VERSION $PRODUCT_ID
